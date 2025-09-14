@@ -1,0 +1,14 @@
+#ignore google credentials and token
+token.json
+
+#ignore user data
+data/
+
+# Ignore Python cache and venv
+__pycache__/
+*.pyc
+venv/
+
+# (Optional) OS-specific files
+.DS_Store
+Thumbs.db
