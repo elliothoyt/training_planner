@@ -1,12 +1,16 @@
-- create training squad - document with links to subdirectories with all the below data
-- create YTP in stages:
- - ask for competition dates
- - assign weeks to macrocycles
- - divide macros in mesocycles of 3-5 weeks
-- Create JSON with start and end of mesocycle, with days of week and times
-- use said JSON to prompt for workouts for the week, 
-- save said workouts in csv file
-- upload said csv to googlecal
-alt: save as ics files. 
+Core functionality work:
+On open, ask to create or open existing training squad:
+create training squad - document with links to subdirectories with all the below data
+For YTP: ask for competition dates
+assign weeks to macrocycles
+divide macros in mesocycles of 3-5 weeks
+Assign weekly scheduleconfig to a mesocycle
 
-nice to have: tkinter interface  
+Nice to haves: 
+- workout dictionary
+- macro and mesocycle goals
+
+Rework tkinter interface to be a grid with LHS being buttons for change/new training group, edit macrocycles, etc
+centre grid is workspace
+menus?
+keyboard shortcut? 
