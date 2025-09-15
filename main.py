@@ -7,15 +7,34 @@ import os
 from queue import Queue, Empty
 from tkinter import ttk
 import sv_ttk
+from tools.weekconfig import save_week_schedule, load_week_schedule
+from datetime import datetime
+
+def valid_time(t):
+    try:
+        datetime.strptime(t, "%H:%M")
+        return True
+    except ValueError:
+        return False
 
 
+def load_config(config_path="data/config.json"):
+    with open(config_path, 'r') as f:
+        return json.load(f)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 calendarwrite_script = os.path.join(BASE_DIR, "tools/calendarwrite.py")
 writeweek_script = os.path.join(BASE_DIR, "tools/writeweek.py")
 weekconfig_script = os.path.join(BASE_DIR, "tools/weekconfig.py")
+
+
+root = tk.Tk()
+root.title("Training Planner GUI")
+sv_ttk.set_theme("dark")
+#root.geometry("800x800")
+
+
 
 class InteractiveRunner:
     def __init__(self, text_widget):
@@ -99,61 +118,113 @@ def send_user_input():
     runner.send_input(user_input)
 
 
+# ---------------- Container for frames ----------------
+container = ttk.Frame(root)
+container.pack(fill="both", expand=True)
 
-# GUI Setup
-root = tk.Tk()
-root.title("Training Planner")
+# We’ll build two frames (screens) and stack them
+frame_output_input = ttk.Frame(container)
+frame_config = ttk.Frame(container)
 
+for frame in (frame_output_input, frame_config):
+    frame.grid(row=0, column=0, sticky='nsew')
 
-# This is where the magic happens
-sv_ttk.set_theme("dark")
-
-
-# Frame for buttons
-button_frame = ttk.Frame(root)
-button_frame.pack(fill="x", padx=10, pady=5)
-
-btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
-                 command=lambda: start_selected_script(calendarwrite_script),
-                 width=30)
-btn1.pack(side="left", padx=5)
-
-btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
-                 command=lambda: start_selected_script(writeweek_script),
-                 width=30)
-btn2.pack(side="left", padx=5)
-
-btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
-                 command=lambda: start_selected_script(weekconfig_script),
-                 width=30)
-btn3.pack(side="left", padx=5)
-
-# Output Text Area
-output_frame = tk.LabelFrame(root, text="Output", padx=5, pady=5)
+# ---------------- Frame A: Output + Input ----------------
+output_frame = tk.LabelFrame(frame_output_input, text="Output", padx=5, pady=5)
 output_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
-output_text = scrolledtext.ScrolledText(output_frame, height=20)
+output_text = scrolledtext.ScrolledText(output_frame, height=5)
 output_text.pack(fill="both", expand=True)
 
-runner = InteractiveRunner(output_text)
-
-# Frame for input
-input_frame = tk.LabelFrame(root, text="User Input", padx=5, pady=5)
+input_frame = tk.LabelFrame(frame_output_input, text="Input", padx=5, pady=5)
 input_frame.pack(fill="x", padx=10, pady=5)
 
 input_box = tk.Text(input_frame, height=3)
 input_box.pack(fill="x")
 
+# ---------------- Frame B: Weekly config ----------------
+days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+inter_frame=ttk.Frame(frame_config)
+inter_frame.pack(anchor='center')
+# Create a frame to hold rows
+rows_frame = ttk.Frame(inter_frame)
+rows_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-send_btn = ttk.Button(root, text="Send Input to Script", command=send_user_input, width=25)
-send_btn.pack(side="left", padx=5)
+# column headers
+header_day = ttk.Label(rows_frame, text="Day", font=("Arial", 12, "bold"))
+header_day.grid(row=0, column=0, padx=5, pady=5)
+header_time = ttk.Label(rows_frame, text="Time (HH:MM)", font=("Arial", 12, "bold"))
+header_time.grid(row=0, column=1, padx=5, pady=5)
 
-stop_btn = ttk.Button(root, text="Stop Script", command=runner.stop_script, width=25)
-stop_btn.pack(side="right", padx=5)
+# store references to comboboxes and entries
+day_selectors = []
+time_entries = []
 
-# Quit button
-quit_btn = ttk.Button(root, text="Quit", command=root.quit, width=20)
-quit_btn.pack(pady=10)
+
+for i in range(14):  # one row per day or more if needed
+    cb = ttk.Combobox(rows_frame, values=days_of_week, width=12)
+    cb.grid(row=i+1, column=0, padx=5, pady=3)
+    entry = ttk.Entry(rows_frame, width=10)
+    entry.grid(row=i+1, column=1, padx=5, pady=3)
+
+    day_selectors.append(cb)
+    time_entries.append(entry)
+
+#load existing
+existing_schedule = load_week_schedule()
+
+for i, cb in enumerate(day_selectors):
+    if i < len(existing_schedule):
+        # match by day name
+        day = list(existing_schedule.keys())[i]
+        time = existing_schedule[day]
+        cb.set(day)
+        time_entries[i].insert(0, time)
+# Button to read all data
+def get_schedule():
+    schedule = []
+    for cb, entry in zip(day_selectors, time_entries):
+        day = cb.get().strip()
+        time = entry.get().strip()
+        if day and time:
+            schedule.append({"day": day, "time": time})
+    print("Schedule:", schedule)  # or feed to weekconfig/save JSON
+    save_week_schedule(schedule)
+
+btn_save = ttk.Button(frame_config, text="Save Schedule", command=get_schedule)
+btn_save.pack(pady=10)
+# ---------------- Frame Switching ----------------
+def show_frame(frame):
+    frame.tkraise()
+
+# Start with the output/input frame
+show_frame(frame_output_input)
+
+# ---------------- Interactive Runner ----------------
+runner = InteractiveRunner(output_text)
+
+def start_selected_script(script_path, frame_to_show):
+    """Switch frames then start script."""
+    show_frame(frame_to_show)
+    runner.start_script(script_path)
+
+# ---------------- Buttons to launch scripts ----------------
+button_frame = tk.Frame(root)
+button_frame.pack(fill="x", padx=10, pady=10)
+
+btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
+                  command=lambda: start_selected_script(calendarwrite_script, frame_output_input),
+                  width=30)
+btn1.pack(side="left", padx=5)
+
+btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
+                  command=lambda: start_selected_script(writeweek_script, frame_config),
+                  width=30)
+btn2.pack(side="left", padx=5)
+
+btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
+    command=lambda: show_frame(frame_config),width=30)  # show frame_config
+btn3.pack(side="left", padx=5)
 
 root.mainloop()
 
