@@ -3,9 +3,10 @@ import csv
 from datetime import datetime, timedelta
 import sys
 import os
-from weekconfig import FILENAMEJSON
+#from weekconfig import WEEKLYSCHEDULEFILENAME
 
 
+FILENAMEJSON="weekly_schedule.json"
 BASEFILENAMECSV="weekly_training_plan.csv"
 # Mapping weekday names to weekday indices (Monday=0, Sunday=6)
 WEEKDAY_INDEX = {
@@ -94,15 +95,10 @@ def save_to_csv(events):
 
 def main():
     try:
-        print("load config")
         config=load_config()
-        print("define CSV directory")
         csv_directory = os.path.abspath(config["csv_directory"])
-        print("define json dir")        
         json_directory = os.path.abspath(config["json_directory"])
-        print("load weekly schedule")
         data = load_json(json_directory,FILENAMEJSON)
-        print(f"{data}")
         events = prompt_for_event_details(data)
         if events:
             save_to_csv(events,csv_directory)
