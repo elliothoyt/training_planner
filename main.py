@@ -253,19 +253,17 @@ for i in range(len(existing_schedule)):
     summary.grid(row=i+1, column=2, padx=5, pady=3)
     description = ttk.Entry(rows_frame, width=50)
     description.grid(row=i+1, column=3, padx=5, pady=3)
-    days.append(day)
-    times.append(time)
-    summaries.append(summaries)
-    descriptions.append(descriptions)
+    days.append(days_list[i])
+    times.append(existing_schedule[days_list[i]])
+    summaries.append(summary)
+    descriptions.append(description)
 
 # Button to save week
 def save_csv():
     csv = []
-    for day, time, summary, description in zip(days,time,summaries,descriptions):
-        day = day.get().strip()
-        time = time.get().strip()
+    for day, time, summary, description in zip(days,times,summaries,descriptions):
         summary = summary.get().strip()
-        descriptiom = description.get().strip()
+        description = description.get().strip()
         if day and time and summary and description:
             csv.append({"day": day, "time": time, "summary": summary, "description": description})
     print("Schedule:", csv)  # or feed to save JSON

@@ -80,13 +80,14 @@ def csvfilename(csv_directory):
     # if today is Monday, days_ahead=0, else days_ahead>0
     next_monday = today + timedelta(days=days_ahead)
     date_str = next_monday.strftime("%Y-%m-%d")  # or any format you like
-    csv_name = f"{date_str}{BASEFILENAME}"
+    csv_name = f"{date_str}{BASEFILENAMECSV}"
     csv_filename = os.path.join(csv_directory,csv_name)
     return csv_filename
 
 def save_to_csv(events):
-    
-    filename=csvfilename()
+    config=load_config()
+    csv_directory = os.path.abspath(config["csv_directory"])
+    filename=csvfilename(csv_directory)
     with open(filename, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=["start_time", "end_time", "summary", "description"])
         writer.writeheader()
@@ -108,4 +109,3 @@ def main():
         print("JSON file not found. Please run the first script to create '{FILENAMEJSON}'.")
 
 
-main()

@@ -2,11 +2,18 @@ import pandas as pd
 import datetime
 from datetime import datetime, timedelta
 import os.path
+import json
 import sys
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from writeweek import BASEFILENAMECSV
+from writeweek import csvfilename
+
+
+def load_config(config_path="data/config.json"):
+    with open(config_path, 'r') as f:
+        return json.load(f)
 
 # If modifying these SCOPES, delete the token.json file
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
@@ -24,14 +31,7 @@ def to_rfc3339(time_str):
     tz_offset = tz_offset[:3] + ':' + tz_offset[3:]  # RFC3339 style
     return dt.strftime("%Y-%m-%dT%H:%M:%S") + tz_offset
 
-def csvfilename()
-    today = datetime.today()
-    # Monday is 0 in weekday(), Sunday is 6
-    days_ahead = (0 - today.weekday()) % 7  # how many days to next Monday
-    # if today is Monday, days_ahead=0, else days_ahead>0
-    next_monday = today + timedelta(days=days_ahead)
-    date_str = next_monday.strftime("%Y-%m-%d")  # or any format you like
-    return f"{date_str}{BASEFILENAME}"
+
 
 
 
@@ -42,7 +42,7 @@ def authenticate_google_calendar():
     # If no valid credentials
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh()
+            creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
@@ -73,8 +73,10 @@ def main():
 
     service = authenticate_google_calendar()
 
+    config=load_config()
+    csv_directory = os.path.abspath(config["csv_directory"])
     # Load CSV
-    filename=csvfilename()
+    filename=csvfilename(csv_directory)
     df = pd.read_csv(filename)
 
     for index, row in df.iterrows():
