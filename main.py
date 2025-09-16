@@ -9,6 +9,7 @@ from tkinter import ttk
 import sv_ttk
 from tools.weekconfig import save_week_schedule, load_week_schedule
 from datetime import datetime
+from tools.writeweek import save_to_csv
 
 def valid_time(t):
     try:
@@ -121,7 +122,7 @@ def send_user_input():
 # ---------------- Container for frames ----------------
 
 sidebar = ttk.Frame(root)
-sidebar.pack(side='left',fill='y')
+sidebar.pack(side='left',fill='y',expand=True)
 container = ttk.Frame(root)
 container.pack(fill="both", expand=True)
 # ---------------- Buttons to launch scripts ----------------
@@ -135,8 +136,7 @@ btn3.pack(side="top", padx=5)
 
 
 btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
-                  command=lambda: start_selected_script(writeweek_script, frame_config),
-                  width=30)
+                  command=lambda: show_frame(frame_week),width=30)
 btn2.pack(side="top", padx=5)
 
 btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
@@ -148,8 +148,9 @@ btn1.pack(side="top", padx=5)
 # We’ll build two frames (screens) and stack them
 frame_output_input = ttk.Frame(container)
 frame_config = ttk.Frame(container)
+frame_week = ttk.Frame(container)
 
-for frame in (frame_output_input, frame_config):
+for frame in (frame_output_input, frame_config,frame_week):
     frame.grid(row=0, column=0, sticky='nsew')
 
 # ---------------- Frame A: Output + Input ----------------
@@ -204,18 +205,76 @@ for i, cb in enumerate(day_selectors):
         cb.set(day)
         time_entries[i].insert(0, time)
 # Button to read all data
-def get_schedule():
+def save_schedule():
     schedule = []
     for cb, entry in zip(day_selectors, time_entries):
         day = cb.get().strip()
         time = entry.get().strip()
         if day and time:
             schedule.append({"day": day, "time": time})
-    print("Schedule:", schedule)  # or feed to weekconfig/save JSON
+    print("Schedule:", schedule)  # or feed to save JSON
     save_week_schedule(schedule)
 
-btn_save = ttk.Button(frame_config, text="Save Schedule", command=get_schedule)
+btn_save = ttk.Button(frame_config, text="Save Weekly Schedule", command=save_schedule)
 btn_save.pack(pady=10)
+
+# ---------------- Frame C: Write Week ------------
+
+interweek_frame=ttk.Frame(frame_week)
+interweek_frame.pack(anchor='nw')
+# Create a frame to hold rows
+rows_frame = ttk.Frame(interweek_frame)
+rows_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+header_day = ttk.Label(rows_frame, text="Day")
+header_day.grid(row=0, column=0, padx=5, pady=5)
+header_time = ttk.Label(rows_frame, text="Time (HH:MM)")
+header_time.grid(row=0, column=1, padx=5, pady=5)
+header_summary = ttk.Label(rows_frame, text="Title")
+header_summary.grid(row=0, column=2, padx=5, pady=5)
+header_summary = ttk.Label(rows_frame, text="Description")
+header_summary.grid(row=0, column=3, padx=5, pady=5)
+
+
+#load existing
+existing_schedule = load_week_schedule()
+days_list=list(existing_schedule.keys())
+days= []
+times = []
+summaries = []
+descriptions = []
+#grid for weekly schedule
+for i in range(len(existing_schedule)):
+    day=ttk.Label(rows_frame,text=days_list[i])
+    day.grid(row=i+1,column=0,padx=5,pady=5)
+    time=ttk.Label(rows_frame,text=existing_schedule[days_list[i]])
+    time.grid(row=i+1,column=1,padx=5,pady=5)
+    summary = ttk.Entry(rows_frame, width=10)
+    summary.grid(row=i+1, column=2, padx=5, pady=3)
+    description = ttk.Entry(rows_frame, width=50)
+    description.grid(row=i+1, column=3, padx=5, pady=3)
+    days.append(day)
+    times.append(time)
+    summaries.append(summaries)
+    descriptions.append(descriptions)
+
+# Button to save week
+def save_csv():
+    csv = []
+    for day, time, summary, description in zip(days,time,summaries,descriptions):
+        day = day.get().strip()
+        time = time.get().strip()
+        summary = summary.get().strip()
+        descriptiom = description.get().strip()
+        if day and time and summary and description:
+            csv.append({"day": day, "time": time, "summary": summary, "description": description})
+    print("Schedule:", csv)  # or feed to save JSON
+    save_to_csv(csv)
+
+btn_save = ttk.Button(frame_week, text="Save Schedule", command=save_csv)
+btn_save.pack(pady=10, side="bottom")
+
+
 # ---------------- Frame Switching ----------------
 def show_frame(frame):
     frame.tkraise()
