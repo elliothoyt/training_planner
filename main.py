@@ -124,7 +124,6 @@ btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
     command=lambda: show_frame(frame_config),width=30)  # show frame_config
 btn3.pack(side="top", padx=5)
 
-
 btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
                   command=lambda: show_frame(frame_week),width=30)
 btn2.pack(side="top", padx=5)
