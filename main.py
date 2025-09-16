@@ -119,8 +119,31 @@ def send_user_input():
 
 
 # ---------------- Container for frames ----------------
+
+sidebar = ttk.Frame(root)
+sidebar.pack(side='left',fill='y')
 container = ttk.Frame(root)
 container.pack(fill="both", expand=True)
+# ---------------- Buttons to launch scripts ----------------
+button_frame = tk.Frame(sidebar)
+button_frame.pack(fill="x", padx=10, pady=10, side='top')
+
+
+btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
+    command=lambda: show_frame(frame_config),width=30)  # show frame_config
+btn3.pack(side="top", padx=5)
+
+
+btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
+                  command=lambda: start_selected_script(writeweek_script, frame_config),
+                  width=30)
+btn2.pack(side="top", padx=5)
+
+btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
+                  command=lambda: start_selected_script(calendarwrite_script, frame_output_input),
+                  width=30)
+btn1.pack(side="top", padx=5)
+
 
 # We’ll build two frames (screens) and stack them
 frame_output_input = ttk.Frame(container)
@@ -208,23 +231,7 @@ def start_selected_script(script_path, frame_to_show):
     show_frame(frame_to_show)
     runner.start_script(script_path)
 
-# ---------------- Buttons to launch scripts ----------------
-button_frame = tk.Frame(root)
-button_frame.pack(fill="x", padx=10, pady=10)
 
-btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
-                  command=lambda: start_selected_script(calendarwrite_script, frame_output_input),
-                  width=30)
-btn1.pack(side="left", padx=5)
-
-btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
-                  command=lambda: start_selected_script(writeweek_script, frame_config),
-                  width=30)
-btn2.pack(side="left", padx=5)
-
-btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
-    command=lambda: show_frame(frame_config),width=30)  # show frame_config
-btn3.pack(side="left", padx=5)
 
 root.mainloop()
 
