@@ -7,9 +7,10 @@ import os
 from queue import Queue, Empty
 from tkinter import ttk
 import sv_ttk
-from tools.weekconfig import save_week_schedule, load_week_schedule
+from src.weekconfig import save_week_schedule, load_week_schedule
 from datetime import datetime
-from tools.writeweek import save_to_csv
+from src.writeweek import save_to_csv
+from src.tools import WELCOMETEXT
 
 def valid_time(t):
     try:
@@ -25,9 +26,7 @@ def load_config(config_path="data/config.json"):
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-calendarwrite_script = os.path.join(BASE_DIR, "tools/calendarwrite.py")
-writeweek_script = os.path.join(BASE_DIR, "tools/writeweek.py")
-weekconfig_script = os.path.join(BASE_DIR, "tools/weekconfig.py")
+calendarwrite_script = os.path.join(BASE_DIR, "src/calendarwrite.py")
 
 
 root = tk.Tk()
@@ -92,15 +91,6 @@ class InteractiveRunner:
             self.text_widget.insert(tk.END, "\n--- Script finished ---\n")
             self.text_widget.see(tk.END)
 
-    def send_input(self, user_input):
-        """Send a line to the running script's stdin."""
-        if self.process and self.process.poll() is None:
-            self.process.stdin.write(user_input + "\n")
-            self.process.stdin.flush()
-        else:
-            self.text_widget.insert(tk.END, "\n[Process not running]\n")
-            self.text_widget.see(tk.END)
-
     def stop_script(self):
         """Terminate the running process."""
         if self.process and self.process.poll() is None:
@@ -112,17 +102,17 @@ class InteractiveRunner:
 def start_selected_script(script_path):
     runner.start_script(script_path)
 
-
-def send_user_input():
-    user_input = input_box.get("1.0", tk.END).strip()
-    input_box.delete("1.0", tk.END)
-    runner.send_input(user_input)
+def close_window(root):
+    root.destroy()
 
 
+# ---------------- keyboard shortcuts -----------------
+root.bind_all('<Control-q>', lambda event: root.quit())
+root.bind_all('<Command-q>', lambda event: root.quit())
 # ---------------- Container for frames ----------------
 
 sidebar = ttk.Frame(root)
-sidebar.pack(side='left',fill='y',expand=True)
+sidebar.pack(side='left',fill='y')
 container = ttk.Frame(root)
 container.pack(fill="both", expand=True)
 # ---------------- Buttons to launch scripts ----------------
@@ -144,14 +134,23 @@ btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
                   width=30)
 btn1.pack(side="top", padx=5)
 
+btnquit = ttk.Button(sidebar, text="Quit",
+                  command=lambda: close_window(root),
+                  width=30)
+btnquit.pack(side="bottom", padx=5)
 
-# We’ll build two frames (screens) and stack them
+# We’ll build some frames (screens) and stack them
+frame_welcome = ttk.Frame(container)
 frame_output_input = ttk.Frame(container)
 frame_config = ttk.Frame(container)
 frame_week = ttk.Frame(container)
 
-for frame in (frame_output_input, frame_config,frame_week):
+for frame in (frame_welcome, frame_config,frame_week,frame_output_input):
     frame.grid(row=0, column=0, sticky='nsew')
+
+# ---------------- Frame 0: Welcome -----------------------
+welcome_frame = ttk.Label(frame_welcome, text=WELCOMETEXT,pad=5)
+welcome_frame.pack(fill="both", expand=True)
 
 # ---------------- Frame A: Output + Input ----------------
 output_frame = tk.LabelFrame(frame_output_input, text="Output", padx=5, pady=5)
@@ -159,12 +158,6 @@ output_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
 output_text = scrolledtext.ScrolledText(output_frame, height=5)
 output_text.pack(fill="both", expand=True)
-
-input_frame = tk.LabelFrame(frame_output_input, text="Input", padx=5, pady=5)
-input_frame.pack(fill="x", padx=10, pady=5)
-
-input_box = tk.Text(input_frame, height=3)
-input_box.pack(fill="x")
 
 # ---------------- Frame B: Weekly config ----------------
 days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -278,7 +271,7 @@ def show_frame(frame):
     frame.tkraise()
 
 # Start with the output/input frame
-show_frame(frame_output_input)
+show_frame(frame_welcome)
 
 # ---------------- Interactive Runner ----------------
 runner = InteractiveRunner(output_text)
