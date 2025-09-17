@@ -133,7 +133,7 @@ frames_dict = {
 # ---------------- sidebar nav ----------------
 sidebar.create_sidebar(root, show_frame, frames_dict,
                        quit_command=root.quit,
-                       start_script=lambda f: print("start script logic"))
+                       start_script=calendarwrite_script)
 
 # ---------------- Frame Switching ----------------
 def show_frame(frame):
