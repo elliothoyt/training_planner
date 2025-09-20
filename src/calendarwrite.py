@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from src.tools import csvfilename
+from tools import csvfilename
 
 
 def load_config(config_path="data/config.json"):
@@ -70,16 +70,12 @@ def add_event(service, summary, start, end, description='', location=''):
     print(f"Event created: {created_event.get('htmlLink')}")
 
 def main():
-    print(f'start')
     service = authenticate_google_calendar()
-    print(f'authenticated')
     config=load_config()
-    print(f'config loaded')
     csv_directory = os.path.abspath(config["csv_directory"])
     # Load CSV
     filename=csvfilename(csv_directory)
     df = pd.read_csv(filename)
-    print(f'loaded csv to df')
     for index, row in df.iterrows():
         try:
             # skip empty rows - might show up at the end of the csv file

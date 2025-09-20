@@ -1,6 +1,6 @@
 from tkinter import ttk
 
-def create_sidebar(parent, show_frame, frames_dict, quit_command, start_script):
+def create_sidebar(parent, show_frame, frames_dict, quit_command, start_selected_script,script):
     sidebar = ttk.Frame(parent)
     sidebar.pack(side='left', fill='y')
 
@@ -16,7 +16,7 @@ def create_sidebar(parent, show_frame, frames_dict, quit_command, start_script):
                width=30).pack(side="top", padx=5)
 
     ttk.Button(button_frame, text="Push Weekly Plan to GCal",
-               command=lambda: (start_script, show_frame(frames_dict['output_input'])),
+               command=lambda: start_selected_script(script, frames_dict['output_input']),
                width=30).pack(side="top", padx=5)
 
     ttk.Button(sidebar, text="Quit",

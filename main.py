@@ -97,12 +97,21 @@ class InteractiveRunner:
             self.text_widget.see(tk.END)
 
 
-def start_selected_script(script_path):
+def start_selected_script(script_path, frame_to_show):
+    """Switch frames then start script."""
+    show_frame(frame_to_show)
     runner.start_script(script_path)
+
+def show_frame(frame):
+    # refresh week frame contents automatically
+    if frame is frame_week:
+        week_frame.populate_frame(frame_week)
+    frame.tkraise()
+
+
 
 def close_window(root):
     root.destroy()
-
 
 # ---------------- keyboard shortcuts -----------------
 root.bind_all('<Control-q>', lambda event: root.quit())
@@ -120,8 +129,6 @@ frame_week = week_frame.create_frame(container)
 for frame in (frame_welcome, frame_config,frame_week,frame_output_input):
     frame.grid(row=0, column=0, sticky='nsew')
 
-def show_frame(frame):
-    frame.tkraise()
 
 frames_dict = {
     'welcome': frame_welcome,
@@ -133,11 +140,12 @@ frames_dict = {
 # ---------------- sidebar nav ----------------
 sidebar.create_sidebar(root, show_frame, frames_dict,
                        quit_command=root.quit,
-                       start_script=calendarwrite_script)
+                       start_selected_script=start_selected_script,
+                       script = calendarwrite_script)
 
 # ---------------- Frame Switching ----------------
-def show_frame(frame):
-    frame.tkraise()
+
+
 
 # Start with the output/input frame
 show_frame(frame_welcome)
@@ -145,10 +153,6 @@ show_frame(frame_welcome)
 # ---------------- Interactive Runner ----------------
 runner = InteractiveRunner(output_text)
 
-def start_selected_script(script_path, frame_to_show):
-    """Switch frames then start script."""
-    show_frame(frame_to_show)
-    runner.start_script(script_path)
 
 
 

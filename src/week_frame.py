@@ -2,13 +2,46 @@ import tkinter as tk
 from tkinter import ttk
 from src.tools import load_week_schedule, save_week_schedule, save_to_csv
 import src.tools as tools
+print("DEBUG >>> LOADED week_frame from src/week_frame.py <<<")
+'''
+def populate_frame(frame_week):
+    #load existing
+    existing_schedule = tools.load_week_schedule()
+    days= []
+    times = []
+    summaries = []
+    descriptions = []
+    #grid for weekly schedule
+    for i, entry in enumerate(existing_schedule):
+        day_name = entry.get("day","")
+        time_val = entry.get("time","")
+        summary_val = entry.get("summary","")
+        desc_val = entry.get("description","")
+        day=ttk.Label(rows_frame,text=day_name)
+        day.grid(row=i+1,column=0,padx=5,pady=5)
+        time=ttk.Label(rows_frame,text=time_val)
+        time.grid(row=i+1,column=1,padx=5,pady=5)
+        summary = ttk.Entry(rows_frame, width=10)
+        summary.grid(row=i+1, column=2, padx=5, pady=3)
+        summary.insert(0, summary_val)
+        description = ttk.Entry(rows_frame, width=50)
+        description.grid(row=i+1, column=3, padx=5, pady=3)
+        description.insert(0, desc_val)
+        days.append(day_name)
+        times.append(time_val)
+        summaries.append(summary)
+        descriptions.append(description)
+
+'''
+
 
 def create_frame(parent):
+    print("DEBUG >>> LOADED week_frame from src/week_frame.py <<<")
     frame_week=ttk.Frame(parent)
 
     interweek_frame=ttk.Frame(frame_week)
     interweek_frame.pack(anchor='nw')
-    # Create a frame to hold rows
+
     rows_frame = ttk.Frame(interweek_frame)
     rows_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -22,28 +55,31 @@ def create_frame(parent):
     header_summary.grid(row=0, column=3, padx=5, pady=5)
 
 
-    #load existing
-    existing_schedule = tools.load_week_schedule()
-    days_list=list(existing_schedule.keys())
-    days= []
-    times = []
-    summaries = []
-    descriptions = []
-    #grid for weekly schedule
-    for i in range(len(existing_schedule)):
-        day=ttk.Label(rows_frame,text=days_list[i])
-        day.grid(row=i+1,column=0,padx=5,pady=5)
-        time=ttk.Label(rows_frame,text=existing_schedule[days_list[i]])
-        time.grid(row=i+1,column=1,padx=5,pady=5)
-        summary = ttk.Entry(rows_frame, width=10)
-        summary.grid(row=i+1, column=2, padx=5, pady=3)
-        description = ttk.Entry(rows_frame, width=50)
-        description.grid(row=i+1, column=3, padx=5, pady=3)
-        days.append(days_list[i])
-        times.append(existing_schedule[days_list[i]])
-        summaries.append(summary)
-        descriptions.append(description)
+    days_labels = []
+    times_labels = []
+    summaries_entries = []
+    descriptions_entries = []
+    for i in range(14):  # max rows
+        day_label = ttk.Label(rows_frame, text="")
+        day_label.grid(row=i+1, column=0, padx=5, pady=5)
+        time_label = ttk.Label(rows_frame, text="")
+        time_label.grid(row=i+1, column=1, padx=5, pady=5)
 
+        summary_entry = ttk.Entry(rows_frame, width=10)
+        summary_entry.grid(row=i+1, column=2, padx=5, pady=3)
+        desc_entry = ttk.Entry(rows_frame, width=50)
+        desc_entry.grid(row=i+1, column=3, padx=5, pady=3)
+
+        days_labels.append(day_label)
+        times_labels.append(time_label)
+        summaries_entries.append(summary_entry)
+        descriptions_entries.append(desc_entry)
+
+    # attach to frame for later use
+    frame_week.days = days_labels
+    frame_week.times = times_labels
+    frame_week.summaries = summaries_entries
+    frame_week.descriptions = descriptions_entries
     # Button to save week
     def save_csv():
         csv = []
@@ -59,5 +95,32 @@ def create_frame(parent):
     btn_save.pack(pady=10, side="bottom")
     
     return frame_week
+
+
+def populate_frame(frame_week):
+    """Reload JSON into the widgets on the frame."""
+    existing_schedule = load_week_schedule()
+    print("DEBUG existing_schedule:", existing_schedule)
+    print("DEBUG type:", type(existing_schedule))
+
+    # clear old contents
+    for day_label, time_label, summary_entry, desc_entry in zip(
+        frame_week.days, frame_week.times, frame_week.summaries, frame_week.descriptions):
+        day_label.config(text="")
+        time_label.config(text="")
+        summary_entry.delete(0, tk.END)
+        desc_entry.delete(0, tk.END)
+
+    for i, sched_item in enumerate(existing_schedule):
+        if i < len(frame_week.days):
+            day = sched_item.get("day", "")
+            time = sched_item.get("time", "")
+            summary = sched_item.get("summary", "")
+            description = sched_item.get("description", "")
+
+            frame_week.days[i].config(text=day)
+            frame_week.times[i].config(text=time)
+            frame_week.summaries[i].insert(0, summary)
+            frame_week.descriptions[i].insert(0, description)
 
 

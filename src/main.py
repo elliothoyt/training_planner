@@ -5,11 +5,12 @@ import sys
 import os
 import sv_ttk
 import src.tools
+import src.week_frame as week_frame
 from tkinter import scrolledtext, messagebox
 from queue import Queue, Empty
 from tkinter import ttk
 from datetime import datetime
-from tools import WELCOMETEXT
+from src.tools import WELCOMETEXT
 
 
 
@@ -33,7 +34,7 @@ class InteractiveRunner:
     def start_script(self, script_path):
         """Start the Python script interactively."""
         # Clear old text
-        self.text_widget.delete("1.0", tk.END)
+        #self.text_widget.delete("1.0", tk.END)
 
         # -u runs Python in unbuffered mode for instant output
         cmd = [sys.executable, "-u", script_path]
@@ -92,7 +93,13 @@ def start_selected_script(script_path):
 
 def close_window(root):
     root.destroy()
+    
 
+
+def show_week_frame():
+    print("DEBUG: show_week_frame called")
+    week_frame.populate_frame(frame_week)
+    show_frame(frame_week)
 
 # ---------------- keyboard shortcuts -----------------
 root.bind_all('<Control-q>', lambda event: root.quit())
@@ -103,6 +110,8 @@ sidebar = ttk.Frame(root)
 sidebar.pack(side='left',fill='y')
 container = ttk.Frame(root)
 container.pack(fill="both", expand=True)
+
+frame_week = week_frame.create_frame(container)
 # ---------------- Buttons to launch scripts ----------------
 button_frame = tk.Frame(sidebar)
 button_frame.pack(fill="x", padx=10, pady=10, side='top')
@@ -113,7 +122,7 @@ btn3 = ttk.Button(button_frame, text="Configure Week Schedule",
 btn3.pack(side="top", padx=5)
 
 btn2 = ttk.Button(button_frame, text="Write Weekly Training Plan",
-                  command=lambda: show_frame(frame_week),width=30)
+                  command=show_week_frame,width=30)
 btn2.pack(side="top", padx=5)
 
 btn1 = ttk.Button(button_frame, text="Push Weekly Plan to GCal",
@@ -130,7 +139,7 @@ btnquit.pack(side="bottom", padx=5)
 frame_welcome = ttk.Frame(container)
 frame_output_input = ttk.Frame(container)
 frame_config = ttk.Frame(container)
-frame_week = ttk.Frame(container)
+frame_week = week_frame.create_frame(container)
 
 for frame in (frame_welcome, frame_config,frame_week,frame_output_input):
     frame.grid(row=0, column=0, sticky='nsew')
@@ -175,7 +184,7 @@ for i in range(14):  # one row per day or more if needed
     time_entries.append(entry)
 
 #load existing
-existing_schedule = tools.load_week_schedule()
+existing_schedule = src.tools.load_week_schedule()
 
 for i, cb in enumerate(day_selectors):
     if i < len(existing_schedule):
@@ -193,7 +202,7 @@ def save_schedule():
         if day and time:
             schedule.append({"day": day, "time": time})
     print("Schedule:", schedule)  # or feed to save JSON
-    tools.save_week_schedule(schedule)
+    src.tools.save_week_schedule(schedule)
 
 btn_save = ttk.Button(frame_config, text="Save Weekly Schedule", command=save_schedule)
 btn_save.pack(pady=10)
