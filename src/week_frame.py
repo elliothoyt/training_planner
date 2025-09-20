@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from src.tools import load_week_schedule, save_week_schedule, save_to_csv
 import src.tools as tools
-print("DEBUG >>> LOADED week_frame from src/week_frame.py <<<")
+
 '''
 def populate_frame(frame_week):
     #load existing
@@ -36,7 +36,6 @@ def populate_frame(frame_week):
 
 
 def create_frame(parent):
-    print("DEBUG >>> LOADED week_frame from src/week_frame.py <<<")
     frame_week=ttk.Frame(parent)
 
     interweek_frame=ttk.Frame(frame_week)
@@ -100,9 +99,7 @@ def create_frame(parent):
 def populate_frame(frame_week):
     """Reload JSON into the widgets on the frame."""
     existing_schedule = load_week_schedule()
-    print("DEBUG existing_schedule:", existing_schedule)
-    print("DEBUG type:", type(existing_schedule))
-
+    
     # clear old contents
     for day_label, time_label, summary_entry, desc_entry in zip(
         frame_week.days, frame_week.times, frame_week.summaries, frame_week.descriptions):
