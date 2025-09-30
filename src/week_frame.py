@@ -82,9 +82,15 @@ def create_frame(parent):
     # Button to save week
     def save_csv():
         csv = []
-        for day, time, summary, description in zip(days,times,summaries,descriptions):
-            summary = summary.get().strip()
-            description = description.get().strip()
+        for day_label, time_label, summary_label, description_label in zip(
+                frame_week.days,
+                frame_week.times,
+                frame_week.summaries,
+                frame_week.descriptions):
+            day = day_label.cget("text")
+            time = time_label.cget("text")
+            summary = summary_label.get().strip()
+            description = description_label.get().strip()
             if day and time and summary and description:
                 csv.append({"day": day, "time": time, "summary": summary, "description": description})
         print("Schedule:", csv)  # or feed to save JSON

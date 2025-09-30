@@ -24,7 +24,7 @@ def get_local_rfc3339_offset():
     return tz_offset[:3] + ':' + tz_offset[3:]  # e.g. "+02:00" or "-04:00"
 
 def to_rfc3339(time_str):
-  
+
     """Convert 'm/d/Y H:M' string to RFC3339 with local timezone."""
     dt = datetime.strptime(time_str, "%m/%d/%y %H:%M")
     tz_offset = datetime.now().astimezone().strftime('%z')
@@ -38,13 +38,13 @@ def to_rfc3339(time_str):
 def authenticate_google_calendar():
     creds = None
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds = Credentials.from_authorized_user_file('data/token.json', SCOPES)
     # If no valid credentials
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file('data/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save credentials
         with open('token.json', 'w') as token:
@@ -67,7 +67,9 @@ def add_event(service, summary, start, end, description='', location=''):
     }
 
     created_event = service.events().insert(calendarId='primary', body=event).execute()
+    event_id = created_event.get('id')
     print(f"Event created: {created_event.get('htmlLink')}")
+    return event_id
 
 def main():
     service = authenticate_google_calendar()
@@ -91,7 +93,7 @@ def main():
             })
 
             #add event
-            add_event(
+            event_id = add_event(
                 service,
                 summary=row['summary'],
                 start=start_dt,
