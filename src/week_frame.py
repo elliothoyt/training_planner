@@ -3,38 +3,6 @@ from tkinter import ttk
 from src.tools import load_week_schedule, save_week_schedule, save_to_csv
 import src.tools as tools
 
-'''
-def populate_frame(frame_week):
-    #load existing
-    existing_schedule = tools.load_week_schedule()
-    days= []
-    times = []
-    summaries = []
-    descriptions = []
-    #grid for weekly schedule
-    for i, entry in enumerate(existing_schedule):
-        day_name = entry.get("day","")
-        time_val = entry.get("time","")
-        summary_val = entry.get("summary","")
-        desc_val = entry.get("description","")
-        day=ttk.Label(rows_frame,text=day_name)
-        day.grid(row=i+1,column=0,padx=5,pady=5)
-        time=ttk.Label(rows_frame,text=time_val)
-        time.grid(row=i+1,column=1,padx=5,pady=5)
-        summary = ttk.Entry(rows_frame, width=10)
-        summary.grid(row=i+1, column=2, padx=5, pady=3)
-        summary.insert(0, summary_val)
-        description = ttk.Entry(rows_frame, width=50)
-        description.grid(row=i+1, column=3, padx=5, pady=3)
-        description.insert(0, desc_val)
-        days.append(day_name)
-        times.append(time_val)
-        summaries.append(summary)
-        descriptions.append(description)
-
-'''
-
-
 def create_frame(parent):
     frame_week=ttk.Frame(parent)
 
